@@ -9,7 +9,7 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-const developerKey = "AIzaSyCx8fTFyaMdxYxAQllzH630Lx4MwhjqEOQ"
+const developerKey = ""
 
 func main() {
 
