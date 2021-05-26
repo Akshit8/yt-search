@@ -15,7 +15,6 @@ import (
 	"github.com/Akshit8/yt-search/yt"
 	es "github.com/elastic/go-elasticsearch/v7"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 // one of the query from the list will be randomly selected and passed for search
@@ -29,15 +28,6 @@ func init() {
 // RandomInt generates a random integer min and max
 func RandomInt(min, max int64) int64 {
 	return min + rand.Int63n(max-min+1)
-}
-
-// load read the env filename and load it into ENV for this process.
-func load(filename string) error {
-	if err := godotenv.Load(filename); err != nil {
-		return fmt.Errorf("loading env var file: %w", err)
-	}
-
-	return nil
 }
 
 // startPolling calls passed function every 30s in a seperate go routine
@@ -72,15 +62,10 @@ func newElasticSearch() (*es.Client, error) {
 }
 
 func main() {
-	var env, address string
+	var address string
 
-	flag.StringVar(&env, "env", "", "Environment Variables filename")
 	flag.StringVar(&address, "address", ":8000", "HTTP Server Address")
 	flag.Parse()
-
-	if err := load(env); err != nil {
-		log.Fatalln("Couldn't load configuration ", err)
-	}
 
 	client, err := newElasticSearch()
 	if err != nil {

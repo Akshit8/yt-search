@@ -32,6 +32,7 @@ type GetVideosResponse struct {
 	Videos []entity.Video `json:"videos"`
 }
 
+// get returns all videos indexed in es as paginated list
 func (v *VideoHandler) get(w http.ResponseWriter, r *http.Request) {
 	skip := r.FormValue("skip")
 	limit := r.FormValue("limit")
@@ -63,6 +64,7 @@ type SearchVideosResponse struct {
 	Videos []entity.Video `json:"videos"`
 }
 
+// search videos that matches provides search params
 func (v *VideoHandler) search(w http.ResponseWriter, r *http.Request) {
 	var req SearchVideosRequest
 	err := json.NewDecoder(r.Body).Decode(&req)

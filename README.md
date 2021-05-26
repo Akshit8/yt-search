@@ -20,6 +20,25 @@ docker-compose -f dev.yml up -d
 
 It will orchestrate a Golang container with our app, Elasticsearch and Kibana container.
 
+## Sample Requests
+
+- **GET /videos**
+
+```bash
+curl --location --request GET 'localhost:8000/videos?skip=0&limit=10'
+```
+
+- **POST /search/videos**
+
+```bash
+curl --location --request POST 'localhost:8000/search/videos' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "title": "hotel",
+    "description": "bitcoin"
+}'
+```
+
 ## Architecture
 
 <img src="./yt-search-arch.png"/>
@@ -49,6 +68,7 @@ Published After: 15 days before timestamp of request
 - Vue.js search client with search text-watcher for real time search/
 
 ## Author
+
 **Akshit Sadana <akshitsadana@gmail.com>**
 
 - Github: [@Akshit8](https://github.com/Akshit8)

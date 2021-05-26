@@ -13,6 +13,7 @@ type ErrorResponse struct {
 	Error      string `json:"error"`
 }
 
+// generic error handler for REST API
 func renderErrorResponse(ctx context.Context, w http.ResponseWriter, msg string, err error) {
 	resp := ErrorResponse{
 		StatusCode: http.StatusInternalServerError,
@@ -25,6 +26,7 @@ func renderErrorResponse(ctx context.Context, w http.ResponseWriter, msg string,
 	renderResponse(w, resp, status)
 }
 
+// generic response handler for REST API/
 func renderResponse(w http.ResponseWriter, res interface{}, status int) {
 	w.Header().Set("Content-Type", "application/json")
 

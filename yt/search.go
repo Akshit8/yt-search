@@ -31,6 +31,7 @@ func NewYoutubeAPI(apiKey string, vs *elasticsearch.VideoSearch) (*YoutubeAPI, e
 	return &YoutubeAPI{service: service, vs: vs}, nil
 }
 
+// parseTime converts string time object
 func (y *YoutubeAPI) parseTime(timeStr string) time.Time {
 	layout := "2006-01-02T15:04:05Z"
 

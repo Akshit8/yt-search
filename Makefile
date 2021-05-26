@@ -19,7 +19,7 @@ install:
 	go mod download
 
 run:
-	go run main.go --env .env --address :8000
+	go run main.go --address :8000
 
 live:
 	reflex -r '\.go' -s -- sh -c "make run"
