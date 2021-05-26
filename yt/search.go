@@ -1,27 +1,55 @@
-package main
+package yt
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/Akshit8/yt-search/elasticsearch"
+	"github.com/Akshit8/yt-search/entity"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
 )
 
-const developerKey = "AIzaSyCx8fTFyaMdxYxAQllzH630Lx4MwhjqEOQ"
+// YoutubeApi defines all actions for youtube api.
+type YoutubeApi struct {
+	service *youtube.Service
+	vs      *elasticsearch.VideoSearch
+}
 
-func main() {
-
-	service, err := youtube.NewService(context.Background(), option.WithAPIKey(developerKey))
+// NewYoutubeApi creates new instance of YoutubeApi
+func NewYoutubeApi(apiKey string, vs *elasticsearch.VideoSearch) (*YoutubeApi, error) {
+	service, err := youtube.NewService(
+		context.Background(),
+		option.WithAPIKey(apiKey),
+	)
 	if err != nil {
-		log.Fatalf("Error creating new Youtube client: %v", err)
+		return nil, fmt.Errorf("error creating new service: %v", err)
 	}
 
-	call := service.Search.List([]string{"id", "snippet"}).
-		Q("blockchain").
-		MaxResults(5).
-		Type("video")
+	return &YoutubeApi{service: service, vs: vs}, nil
+}
+
+func (y *YoutubeApi) parseTime(timeStr string) time.Time {
+	layout := "2006-01-02T15:04:05Z"
+
+	t, err := time.Parse(layout, timeStr)
+
+	if err != nil {
+		return time.Time{}
+	}
+
+	return t
+}
+
+func (y *YoutubeApi) Search(ctx context.Context) {
+	call := y.service.Search.List([]string{"id", "snippet"}).
+		Q("blockchain|travel|tesla|bitcoin|dogecoin|").
+		MaxResults(60).
+		Type("video").
+		Order("date").
+		PublishedAfter(time.Now().Add(-15 * 60 * time.Hour).Format(time.RFC3339))
 
 	response, err := call.Do()
 	if err != nil {
@@ -29,24 +57,17 @@ func main() {
 	}
 
 	for _, item := range response.Items {
-		fmt.Printf("Video id: %s \n Title: %s \n Description: %s \n Publishing Datetime: %s \n Thumbnail: %s \n \n----------\n",
-			item.Id.VideoId,
-			item.Snippet.Title,
-			item.Snippet.Description,
-			item.Snippet.PublishedAt,
-			item.Snippet.Thumbnails.Default.Url,
-		)
-	}
+		video := entity.Video{
+			ID:          item.Id.VideoId,
+			Title:       item.Snippet.Title,
+			Description: item.Snippet.Description,
+			PublishedAt: y.parseTime(item.Snippet.PublishedAt),
+			Thumbnail:   item.Snippet.Thumbnails.Default.Url,
+		}
 
-	call2 := service.Videos.List([]string{"id", "snippet"}).Id("hYip_Vuv8J0")
-	video, err := call2.Do()
-	if err != nil {
-		log.Fatalf("Error fetching search response: %v", err)
+		err := y.vs.Index(ctx, video)
+		if err != nil {
+			log.Fatalln("Error indexing video ", err)
+		}
 	}
-
-	fmt.Printf("Video id: %s \n Title: %s \n Description: %s \n ",
-		video.Items[0].Id,
-		video.Items[0].Snippet.Title,
-		video.Items[0].Snippet.Description,
-	)
 }

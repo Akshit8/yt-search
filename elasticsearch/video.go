@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"time"
 
 	"github.com/Akshit8/yt-search/entity"
 	es "github.com/elastic/go-elasticsearch/v7"
@@ -20,15 +19,7 @@ type VideoSearch struct {
 	index  string
 }
 
-type indexedVideo struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	PublishedAt time.Time `json:"published_at"`
-	Thumbnail   string    `json:"thumbnail"`
-}
-
-// NewVideoSearch creates new instan
+// NewVideoSearch creates new instance
 func NewVideoSearch(client *es.Client) *VideoSearch {
 	return &VideoSearch{
 		client: client,
@@ -38,17 +29,9 @@ func NewVideoSearch(client *es.Client) *VideoSearch {
 
 // Index creates or updates a task in an index.
 func (v *VideoSearch) Index(ctx context.Context, video entity.Video) error {
-	body := indexedVideo{
-		ID:          video.ID,
-		Title:       video.Title,
-		Description: video.Description,
-		PublishedAt: video.PublishedAt,
-		Thumbnail:   video.Thumbnail,
-	}
-
 	var buf bytes.Buffer
 
-	err := json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(video)
 	if err != nil {
 		return err
 	}
@@ -123,11 +106,12 @@ func (v *VideoSearch) Search(ctx context.Context, title, description *string) ([
 	}
 
 	req := esapi.SearchRequest{
-		Index: []string{v.index},
+		Index: []string{"videos"},
 		Body:  &buf,
 	}
 
-	resp, err := req.Do(ctx, v.client)
+	client := v.client
+	resp, err := req.Do(ctx, client)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +124,7 @@ func (v *VideoSearch) Search(ctx context.Context, title, description *string) ([
 	var hits struct {
 		Hits struct {
 			Hits []struct {
-				Source indexedVideo `json:"_source"`
+				Source entity.Video `json:"_source"`
 			} `json:"hits"`
 		} `json:"hits"`
 	}

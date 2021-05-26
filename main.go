@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -8,7 +9,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/Akshit8/yt-search/elasticsearch"
 	"github.com/Akshit8/yt-search/rest"
+	"github.com/Akshit8/yt-search/yt"
+	es "github.com/elastic/go-elasticsearch/v7"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -22,6 +26,32 @@ func load(filename string) error {
 	return nil
 }
 
+// startPolling calls passed function every 30s in a seperate go routine
+func startPolling(f func(context.Context), ctx context.Context) {
+	for {
+		f(ctx)
+		time.Sleep(30 * time.Minute)
+	}
+}
+
+func newElasticSearch() (*es.Client, error) {
+	client, err := es.NewDefaultClient()
+	if err != nil {
+		return nil, fmt.Errorf("elasticsearch.Open %w", err)
+	}
+
+	res, err := client.Info()
+	if err != nil {
+		return nil, fmt.Errorf("es.Info %w", err)
+	}
+
+	defer func() {
+		err = res.Body.Close()
+	}()
+
+	return client, nil
+}
+
 func main() {
 	var env string
 
@@ -29,12 +59,26 @@ func main() {
 	flag.Parse()
 
 	if err := load(env); err != nil {
-		log.Fatalln("Couldn't load configuration", err)
+		log.Fatalln("Couldn't load configuration ", err)
 	}
+
+	client, err := newElasticSearch()
+	if err != nil {
+		log.Fatalln("Couldn't create elasticsearch client ", err)
+	}
+
+	vs := elasticsearch.NewVideoSearch(client)
+
+	api, err := yt.NewYoutubeApi(os.Getenv("YOUTUBE_API_KEY"), vs)
+	if err != nil {
+		log.Fatalln("Error creating youtube api ", err)
+	}
+
+	go startPolling(api.Search, context.Background())
 
 	r := mux.NewRouter()
 
-	rest.NewVideoHandler().Register(r)
+	rest.NewVideoHandler(vs).Register(r)
 
 	address := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
 
