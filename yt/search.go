@@ -12,14 +12,14 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-// YoutubeApi defines all actions for youtube api.
-type YoutubeApi struct {
+// YoutubeAPI defines all actions for youtube api.
+type YoutubeAPI struct {
 	service *youtube.Service
 	vs      *elasticsearch.VideoSearch
 }
 
-// NewYoutubeApi creates new instance of YoutubeApi
-func NewYoutubeApi(apiKey string, vs *elasticsearch.VideoSearch) (*YoutubeApi, error) {
+// NewYoutubeAPI creates new instance of YoutubeApi
+func NewYoutubeAPI(apiKey string, vs *elasticsearch.VideoSearch) (*YoutubeAPI, error) {
 	service, err := youtube.NewService(
 		context.Background(),
 		option.WithAPIKey(apiKey),
@@ -28,10 +28,10 @@ func NewYoutubeApi(apiKey string, vs *elasticsearch.VideoSearch) (*YoutubeApi, e
 		return nil, fmt.Errorf("error creating new service: %v", err)
 	}
 
-	return &YoutubeApi{service: service, vs: vs}, nil
+	return &YoutubeAPI{service: service, vs: vs}, nil
 }
 
-func (y *YoutubeApi) parseTime(timeStr string) time.Time {
+func (y *YoutubeAPI) parseTime(timeStr string) time.Time {
 	layout := "2006-01-02T15:04:05Z"
 
 	t, err := time.Parse(layout, timeStr)
@@ -43,7 +43,9 @@ func (y *YoutubeApi) parseTime(timeStr string) time.Time {
 	return t
 }
 
-func (y *YoutubeApi) Search(ctx context.Context) {
+// Search is a worker function that extracts videos from Youtube Date API and 
+// indexes them to elastic search.
+func (y *YoutubeAPI) Search(ctx context.Context) {
 	call := y.service.Search.List([]string{"id", "snippet"}).
 		Q("blockchain|travel|tesla|bitcoin|dogecoin|").
 		MaxResults(60).

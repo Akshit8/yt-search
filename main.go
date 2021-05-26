@@ -27,7 +27,7 @@ func load(filename string) error {
 }
 
 // startPolling calls passed function every 30s in a seperate go routine
-func startPolling(f func(context.Context), ctx context.Context) {
+func startPolling(ctx context.Context, f func(context.Context)) {
 	for {
 		// f(ctx)
 		time.Sleep(30 * time.Minute)
@@ -69,12 +69,12 @@ func main() {
 
 	vs := elasticsearch.NewVideoSearch(client)
 
-	api, err := yt.NewYoutubeApi(os.Getenv("YOUTUBE_API_KEY"), vs)
+	api, err := yt.NewYoutubeAPI(os.Getenv("YOUTUBE_API_KEY"), vs)
 	if err != nil {
 		log.Fatalln("Error creating youtube api ", err)
 	}
 
-	go startPolling(api.Search, context.Background())
+	go startPolling(context.Background(), api.Search)
 
 	r := mux.NewRouter()
 
