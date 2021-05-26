@@ -18,7 +18,7 @@ Start the application with `docker-compose`
 docker-compose -f dev.yml up -d
 ```
 
-It will orchestrate a Golang container with our app, Elasticsearch and Kibana container.
+It will orchestrate our app, Elasticsearch and Kibana containers.
 
 ## Sample Requests
 
@@ -47,7 +47,7 @@ curl --location --request POST 'localhost:8000/search/videos' \
 
 - A more traditional approach for implementing search function in backend systems is to maintain data in SQL/NoSQL db and sync elasticsearch with it on a scheduled basis. While a similar approach could have been implemented here, but since we are pulling data from an API that is continuosly changing, directly indexing it to elastic search is much more efficient(which is implemented in this app).
 
-- The worker that pulls data from API and pushes it to elasticsearch, though runs asynchronously in a different routine, halts execution in case of error occurence(as a channel is passed to it). This behaviour can be changes i.e the app runs completely independent of worker(even if worker is not running).
+- The worker that pulls data from API and pushes it to elasticsearch, though runs asynchronously in a different routine, halts execution in case of error occurence(as a channel is passed to it). This behaviour can be changed i.e the app can run completely independent of worker(even if worker is not running).
 
 - Implementing elasticsearch provide powerful searching capability.
 
@@ -64,8 +64,8 @@ Published After: 15 days before timestamp of request
 
 ## TODO
 
-- Auto rotation of multiple API keys on quota exhaustation
-- Vue.js search client with search text-watcher for real time search/
+- Auto rotation of multiple API keys on quota exhaustation.
+- Vue.js search client with search text-watcher for real-time search.
 
 ## Author
 
