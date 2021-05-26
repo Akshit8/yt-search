@@ -43,6 +43,7 @@ func startPolling(
 	}
 }
 
+// newElasticSearch creates es cient and returns if connection to es is successful.
 func newElasticSearch() (*es.Client, error) {
 	client, err := es.NewDefaultClient()
 	if err != nil {
