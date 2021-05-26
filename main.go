@@ -29,7 +29,7 @@ func load(filename string) error {
 // startPolling calls passed function every 30s in a seperate go routine
 func startPolling(f func(context.Context), ctx context.Context) {
 	for {
-		f(ctx)
+		// f(ctx)
 		time.Sleep(30 * time.Minute)
 	}
 }

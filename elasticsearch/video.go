@@ -58,12 +58,73 @@ func (v *VideoSearch) Index(ctx context.Context, video entity.Video) error {
 	return nil
 }
 
-// Search returns tasks matching a query.
-func (v *VideoSearch) Search(ctx context.Context, title, description *string) ([]entity.Video, error) {
-	if title == nil && description == nil {
-		return nil, nil
+// Get return all videos indexed in elasticsearch with pagination.
+func (v *VideoSearch) Get(ctx context.Context, skip, limit int) ([]entity.Video, error) {
+	query := map[string]interface{}{
+		"from": skip,
+		"size": limit,
+		"sort": map[string]interface{}{
+			"published_at": map[string]interface{}{
+				"order": "desc",
+			},
+		},
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
+		},
 	}
 
+	var buf bytes.Buffer
+
+	err := json.NewEncoder(&buf).Encode(query)
+	if err != nil {
+		return nil, err
+	}
+
+	req := esapi.SearchRequest{
+		Index: []string{"videos"},
+		Body:  &buf,
+	}
+
+	client := v.client
+	resp, err := req.Do(ctx, client)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.IsError() {
+		return nil, fmt.Errorf("SearchRequest error: %d", resp.StatusCode)
+	}
+
+	var hits struct {
+		Hits struct {
+			Hits []struct {
+				Source entity.Video `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&hits)
+	if err != nil {
+		fmt.Println("Error here", err)
+		return nil, err
+	}
+
+	res := make([]entity.Video, len(hits.Hits.Hits))
+
+	for i, hit := range hits.Hits.Hits {
+		res[i].ID = hit.Source.ID
+		res[i].Title = hit.Source.Title
+		res[i].Description = hit.Source.Description
+		res[i].PublishedAt = hit.Source.PublishedAt
+		res[i].Thumbnail = hit.Source.Thumbnail
+	}
+
+	return res, nil
+}
+
+// Search returns videos matching a query.
+func (v *VideoSearch) Search(ctx context.Context, title, description *string) ([]entity.Video, error) {
 	should := make([]interface{}, 0, 2)
 
 	if title != nil {

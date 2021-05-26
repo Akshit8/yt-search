@@ -7,3 +7,18 @@ fmt.Printf("Video id: %s \n Title: %s \n Description: %s \n Publishing Datetime:
 			item.Snippet.Thumbnails.Default.Url,
 		)
 ```
+
+// query := `{
+	// 	"from": 70,
+	// 	"size": 10,
+	// 	"sort": [
+	// 	  {
+	// 		"published_at": {
+	// 		  "order": "desc"
+	// 		}
+	// 	  }
+	// 	], 
+	// 	"query": {
+	// 		"match_all": {}
+	// 	}
+	// }`

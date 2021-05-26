@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -18,6 +19,8 @@ func renderErrorResponse(ctx context.Context, w http.ResponseWriter, msg string,
 		Error: msg,
 	}
 	status := http.StatusInternalServerError
+
+	log.Println("REST ERROR: ", err.Error())
 
 	renderResponse(w, resp, status)
 }
