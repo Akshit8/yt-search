@@ -18,7 +18,9 @@ Start the application with `docker-compose`
 docker-compose -f dev.yml up -d
 ```
 
-It will orchestrate our app, Elasticsearch and Kibana containers.
+It will orchestrate our app, Elasticsearch and Kibana containers.<br/>
+
+Image is pulled from my docker registry [here](https://hub.docker.com/repository/docker/akshit8/yt-search).
 
 ## Sample Requests
 
