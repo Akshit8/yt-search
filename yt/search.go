@@ -45,9 +45,9 @@ func (y *YoutubeAPI) parseTime(timeStr string) time.Time {
 
 // Search is a worker function that extracts videos from Youtube Date API and
 // indexes them to elastic search.
-func (y *YoutubeAPI) Search(ctx context.Context) {
+func (y *YoutubeAPI) Search(ctx context.Context, query string, c chan error) {
 	call := y.service.Search.List([]string{"id", "snippet"}).
-		Q("blockchain|travel|tesla|bitcoin|dogecoin|").
+		Q(query).
 		MaxResults(60).
 		Type("video").
 		Order("date").
@@ -55,7 +55,8 @@ func (y *YoutubeAPI) Search(ctx context.Context) {
 
 	response, err := call.Do()
 	if err != nil {
-		log.Fatalf("Error fetching search response: %v", err)
+		log.Println("Error fetching search response ", err)
+		c <- err
 	}
 
 	for _, item := range response.Items {
@@ -69,7 +70,8 @@ func (y *YoutubeAPI) Search(ctx context.Context) {
 
 		err := y.vs.Index(ctx, video)
 		if err != nil {
-			log.Fatalln("Error indexing video ", err)
+			log.Println("Error indexing video ", err)
+			c <- err
 		}
 	}
 }

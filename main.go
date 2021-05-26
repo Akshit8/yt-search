@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -17,6 +18,18 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var ytQueries = []string{"blockchain", "tesla", "dogecoin", "eth2.0", "elon musk", "maldives"}
+
+// sets random seed on start of app.
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+// RandomInt generates a random integer min and max
+func RandomInt(min, max int64) int64 {
+	return min + rand.Int63n(max-min+1)
+}
+
 // load read the env filename and load it into ENV for this process.
 func load(filename string) error {
 	if err := godotenv.Load(filename); err != nil {
@@ -27,10 +40,15 @@ func load(filename string) error {
 }
 
 // startPolling calls passed function every 30s in a seperate go routine
-func startPolling(ctx context.Context, f func(context.Context)) {
+func startPolling(
+	ctx context.Context,
+	c chan error,
+	f func(context.Context, string, chan error),
+) {
 	for {
-		// f(ctx)
-		time.Sleep(30 * time.Minute)
+		index := RandomInt(0, int64(len(ytQueries) - 1))
+		f(ctx, ytQueries[index], c)
+		time.Sleep(20 * time.Minute)
 	}
 }
 
@@ -75,7 +93,9 @@ func main() {
 		log.Fatalln("Error creating youtube api ", err)
 	}
 
-	go startPolling(context.Background(), api.Search)
+	errs := make(chan error, 1)
+
+	go startPolling(context.Background(), errs, api.Search)
 
 	r := mux.NewRouter()
 
