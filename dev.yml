@@ -24,8 +24,6 @@ services:
     image: yt-search
     ports:
       - 8000:8000
-    environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      YOUTUBE_API_KEY: asdlkjskd
+
 
       

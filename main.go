@@ -18,6 +18,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// one of the query from the list will be randomly selected and passed for search
 var ytQueries = []string{"blockchain", "tesla", "dogecoin", "eth2.0", "elon musk", "maldives"}
 
 // sets random seed on start of app.
@@ -46,7 +47,7 @@ func startPolling(
 	f func(context.Context, string, chan error),
 ) {
 	for {
-		index := RandomInt(0, int64(len(ytQueries) - 1))
+		index := RandomInt(0, int64(len(ytQueries)-1))
 		f(ctx, ytQueries[index], c)
 		time.Sleep(20 * time.Minute)
 	}

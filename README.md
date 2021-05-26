@@ -1,24 +1,55 @@
-```go
-fmt.Printf("Video id: %s \n Title: %s \n Description: %s \n Publishing Datetime: %s \n Thumbnail: %s \n \n----------\n",
-			item.Id.VideoId,
-			item.Snippet.Title,
-			item.Snippet.Description,
-			item.Snippet.PublishedAt,
-			item.Snippet.Thumbnails.Default.Url,
-		)
+# yt-search
+
+yt-search is minimal implementation of `search functionality` using **Elasticsearch** and **Youtube Data API** in Go.
+
+## Starting the project
+
+Create a `.env` file in root dir.
+
+```bash
+cat .sample.env > .env
 ```
 
-// query := `{
-	// 	"from": 70,
-	// 	"size": 10,
-	// 	"sort": [
-	// 	  {
-	// 		"published_at": {
-	// 		  "order": "desc"
-	// 		}
-	// 	  }
-	// 	], 
-	// 	"query": {
-	// 		"match_all": {}
-	// 	}
-	// }`
+Supply Youtube data API v3 `API_KEY` to the file.<br/>
+
+Start the application with `docker-compose`
+
+```bash
+docker-compose -f dev.yml up -d
+```
+
+It will orchestrate a Golang container with our app, Elasticsearch and Kibana container.
+
+## Architecture
+
+<img src="./yt-search-arch.png"/>
+
+## Optimization and key highlights
+
+- A more traditional approach for implementing search function in backend systems is to maintain data in SQL/NoSQL db and sync elasticsearch with it on a scheduled basis. While a similar approach could have been implemented here, but since we are pulling data from an API that is continuosly changing, directly indexing it to elastic search is much more efficient(which is implemented in this app).
+
+- The worker that pulls data from API and pushes it to elasticsearch, though runs asynchronously in a different routine, halts execution in case of error occurence(as a channel is passed to it). This behaviour can be changes i.e the app runs completely independent of worker(even if worker is not running).
+
+- Implementing elasticsearch provide powerful searching capability.
+
+## Search Query Parms
+
+```
+Fields Extracted: {ID, Title, Description, PublishedAt, Thumbnail}
+Queries: {"blockchain", "tesla", "dogecoin", "eth2.0", "elon musk", "maldives"}
+Max Limit Of Video/ request: 60
+Resource Type requested: Video
+Result Sorted By: published_at
+Published After: 15 days before timestamp of request
+```
+
+## TODO
+
+- Auto rotation of multiple API keys on quota exhaustation
+- Vue.js search client with search text-watcher for real time search/
+
+## Author
+**Akshit Sadana <akshitsadana@gmail.com>**
+
+- Github: [@Akshit8](https://github.com/Akshit8)
+- LinkedIn: [@akshitsadana](https://www.linkedin.com/in/akshit-sadana-b051ab121/)
