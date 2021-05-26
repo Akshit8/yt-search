@@ -1,0 +1,7 @@
+make fmt
+
+make lint
+
+make vet
+
+make test

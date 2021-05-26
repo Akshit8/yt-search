@@ -15,8 +15,8 @@ type ErrorResponse struct {
 
 func renderErrorResponse(ctx context.Context, w http.ResponseWriter, msg string, err error) {
 	resp := ErrorResponse{
-		StatusCode: http.StatusInternalServerError, 
-		Error: msg,
+		StatusCode: http.StatusInternalServerError,
+		Error:      msg,
 	}
 	status := http.StatusInternalServerError
 

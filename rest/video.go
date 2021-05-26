@@ -41,12 +41,12 @@ func (v *VideoHandler) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	skipINT, _ := strconv.Atoi(skip) // NOTE: Safe to ignore error
+	skipINT, _ := strconv.Atoi(skip)   // NOTE: Safe to ignore error
 	limitINT, _ := strconv.Atoi(limit) // NOTE: Safe to ignore error
 	res, err := v.vs.Get(r.Context(), skipINT, limitINT)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "get failed", err)
-		return 
+		return
 	}
 
 	renderResponse(w, &GetVideosResponse{Videos: res}, http.StatusOK)
@@ -54,7 +54,7 @@ func (v *VideoHandler) get(w http.ResponseWriter, r *http.Request) {
 
 // SearchVideosRequest defines the request used for searching videos.
 type SearchVideosRequest struct {
-	Title       *string  `json:"title"`
+	Title       *string `json:"title"`
 	Description *string `json:"description"`
 }
 
@@ -80,7 +80,7 @@ func (v *VideoHandler) search(w http.ResponseWriter, r *http.Request) {
 	res, err := v.vs.Search(r.Context(), req.Title, req.Description)
 	if err != nil {
 		renderErrorResponse(r.Context(), w, "search failed", err)
-		return 
+		return
 	}
 
 	renderResponse(w, &SearchVideosResponse{Videos: res}, http.StatusOK)
