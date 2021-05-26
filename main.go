@@ -53,9 +53,10 @@ func newElasticSearch() (*es.Client, error) {
 }
 
 func main() {
-	var env string
+	var env, address string
 
 	flag.StringVar(&env, "env", "", "Environment Variables filename")
+	flag.StringVar(&address, "address", ":8000", "HTTP Server Address")
 	flag.Parse()
 
 	if err := load(env); err != nil {
@@ -79,8 +80,6 @@ func main() {
 	r := mux.NewRouter()
 
 	rest.NewVideoHandler(vs).Register(r)
-
-	address := fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT"))
 
 	srv := &http.Server{
 		Handler:           r,

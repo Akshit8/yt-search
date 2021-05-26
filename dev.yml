@@ -16,3 +16,16 @@ services:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: yt-search
+    ports:
+      - 8000:8000
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      YOUTUBE_API_KEY: asdlkjskd
+
+      

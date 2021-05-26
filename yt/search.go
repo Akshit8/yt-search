@@ -43,7 +43,7 @@ func (y *YoutubeAPI) parseTime(timeStr string) time.Time {
 	return t
 }
 
-// Search is a worker function that extracts videos from Youtube Date API and 
+// Search is a worker function that extracts videos from Youtube Date API and
 // indexes them to elastic search.
 func (y *YoutubeAPI) Search(ctx context.Context) {
 	call := y.service.Search.List([]string{"id", "snippet"}).
